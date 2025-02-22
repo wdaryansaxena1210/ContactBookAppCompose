@@ -5,6 +5,7 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 import org.mongodb.kbson.ObjectId
 
 class Contact : RealmObject {
+
     @PrimaryKey
     var id: ObjectId = ObjectId()
     var firstName: String = ""
