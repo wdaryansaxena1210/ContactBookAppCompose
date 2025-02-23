@@ -76,8 +76,11 @@ class MainActivity : ComponentActivity() {
                     }
                 )
             }
-            composable("contact_detail_screen/{id}") {it->
-                Text("${it.arguments?.getString("id")}")
+            composable("contact_detail_screen/{id}") {
+                ContactDetailScreen(
+                    id = it.arguments?.getString("id"),
+                    realm = viewModel.realm
+                )
             }
 
         }
