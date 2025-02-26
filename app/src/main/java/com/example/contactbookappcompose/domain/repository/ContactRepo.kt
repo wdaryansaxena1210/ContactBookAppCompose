@@ -11,7 +11,7 @@ interface ContactRepo {
     abstract suspend fun getContacts(): Flow<Resource<List<Contact>>>
     abstract suspend fun addContact(contact: ContactData)
     abstract suspend fun deleteContact(contactId: ObjectId)
-    abstract suspend fun updateContact(contact: Contact)
+    abstract suspend fun updateContact(contact: Contact, newContact: ContactData)
     abstract suspend fun getContact():Contact
 
 }

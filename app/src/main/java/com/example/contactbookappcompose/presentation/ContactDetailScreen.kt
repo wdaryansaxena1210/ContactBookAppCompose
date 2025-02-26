@@ -39,7 +39,7 @@ fun ContactDetailScreen(id: String?, modifier: Modifier = Modifier, viewModel: C
     }
 
     val id = id.removePrefix("BsonObjectId(").removeSuffix(")")
-    println(id)
+    println("find contact with id $id and render its Details")
 
     val contact = viewModel.findContactById(id)
 
@@ -102,12 +102,20 @@ private fun ContactDetails(
         }
 
         Button(
-            modifier = Modifier.fillMaxWidth().background(Color.Red),
+            modifier=Modifier.fillMaxWidth(),
+            onClick = {navController.navigate("edit_contact/${contact.id}")}
+        ) {
+            Text("Edit Contact")
+        }
+
+        Button(
+            modifier = Modifier.fillMaxWidth(),
             onClick = {
                 viewModel.deleteContact(contact.id)
                 navController.popBackStack()
             }
-        ) { }
+        ) { Text("Delete Contact") }
+
     }
 }
 

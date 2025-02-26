@@ -85,4 +85,10 @@ class ContactViewModel : ViewModel() {
         val contact = realm.query<Contact>("id == $0", ObjectId(id)).first().find()
         return contact
     }
+
+    fun editContact(contact: Contact, newContact: ContactData){
+        viewModelScope.launch(Dispatchers.IO) {
+            contactRepo.updateContact(contact, newContact)
+        }
+    }
 }

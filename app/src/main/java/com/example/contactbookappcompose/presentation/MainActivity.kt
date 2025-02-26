@@ -25,6 +25,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.contactbookappcompose.presentation.ui.theme.ContactBookAppComposeTheme
+import com.example.contactbookappcompose.presentation.ui.theme.EditContactScreen
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -108,8 +109,16 @@ class MainActivity : ComponentActivity() {
                     realm = viewModel.realm,
                     viewModel = viewModel)
             }
-
-
+            composable("edit_contact/{id}") { it ->
+                val id = it.arguments?.getString("id")
+                EditContactScreen(
+                    id = id,
+                    onEditSave = viewModel::editContact,
+                    popBackStack = navController::popBackStack,
+                    navController = navController,
+                    viewModel = viewModel,
+                )
+            }
         }
     }
 }

@@ -73,8 +73,18 @@ class ContactRepoImpl : ContactRepo {
         }
     }
 
-    override suspend fun updateContact(contact: Contact) {
-        TODO("Not yet implemented")
+    override suspend fun updateContact(contact: Contact, newContact: ContactData) {
+        realm.write {
+            val contact = findLatest(contact) ?: return@write
+            contact.apply {
+                this.firstName = newContact.firstName
+                this.lastName = newContact.lastName
+                this.phoneNumber = newContact.phoneNumber
+                this.email = newContact.email
+                this.address = newContact.address
+            }
+            print("contact updated. New First Name is ${contact.firstName}")
+        }
     }
 
     override suspend fun getContact(): Contact {
