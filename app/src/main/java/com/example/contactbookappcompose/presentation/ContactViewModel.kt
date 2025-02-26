@@ -11,14 +11,18 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.query
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.mongodb.kbson.ObjectId
 
 class ContactViewModel : ViewModel() {
-    var config: RealmConfiguration = RealmConfiguration.create(schema = setOf(Contact::class))
-    var realm : Realm = Realm.open(config)
+
     val contactRepo: ContactRepo = ContactRepoImpl()
 
 
@@ -49,7 +53,7 @@ class ContactViewModel : ViewModel() {
                             _state.emit(ContactState(contacts = result.data ?: emptyList()))
                         }
                         is Resource.Error -> {
-                            TODO()
+                            _state.emit(ContactState(errorMessage = result.message))
                         }
                     }
                 }
@@ -78,11 +82,21 @@ class ContactViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             contactRepo.deleteContact(contactId)
         }
-        _state.value = _state.value.copy( contacts = realm.query<Contact>().find())
+
+        //the line below which updates the value of state is NOT needed
+        //_state.value = _state.value.copy( contacts = )
+
+        //Q) why is that line not necessary?
+        //
     }
 
     fun findContactById(id: String): Contact? {
-        val contact = realm.query<Contact>("id == $0", ObjectId(id)).first().find()
+        var contact: Contact?
+
+        runBlocking {
+            contact = contactRepo.findContactById(id)
+        }
+
         return contact
     }
 

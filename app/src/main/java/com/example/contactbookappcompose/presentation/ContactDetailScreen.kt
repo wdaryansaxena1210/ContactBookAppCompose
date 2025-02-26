@@ -40,8 +40,9 @@ fun ContactDetailScreen(id: String?, modifier: Modifier = Modifier, viewModel: C
 
     val id = id.removePrefix("BsonObjectId(").removeSuffix(")")
     println("find contact with id $id and render its Details")
-
+//
     val contact = viewModel.findContactById(id)
+
 
     if(contact != null) {
         ContactDetails(modifier, contact, viewModel, navController)

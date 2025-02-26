@@ -106,7 +106,6 @@ class MainActivity : ComponentActivity() {
             composable("add_contact") {
                 AddContactScreen(
                     navController = navController,
-                    realm = viewModel.realm,
                     viewModel = viewModel)
             }
             composable("edit_contact/{id}") { it ->

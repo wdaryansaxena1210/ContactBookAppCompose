@@ -1,19 +1,14 @@
 package com.example.contactbookappcompose.data.repository
 
-import androidx.lifecycle.viewModelScope
 import com.example.contactbookappcompose.data.local.Contact
 import com.example.contactbookappcompose.domain.contact.ContactData
 import com.example.contactbookappcompose.domain.repository.ContactRepo
 import com.example.contactbookappcompose.domain.utils.Resource
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
-import io.realm.kotlin.delete
 import io.realm.kotlin.ext.query
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
-import org.mongodb.kbson.BsonObjectId.Companion.invoke
 import org.mongodb.kbson.ObjectId
 
 class ContactRepoImpl : ContactRepo {
@@ -75,19 +70,21 @@ class ContactRepoImpl : ContactRepo {
 
     override suspend fun updateContact(contact: Contact, newContact: ContactData) {
         realm.write {
-            val contact = findLatest(contact) ?: return@write
-            contact.apply {
+            val contactToEdit = findLatest(contact) ?: return@write
+            contactToEdit.apply {
                 this.firstName = newContact.firstName
                 this.lastName = newContact.lastName
                 this.phoneNumber = newContact.phoneNumber
                 this.email = newContact.email
                 this.address = newContact.address
             }
-            print("contact updated. New First Name is ${contact.firstName}")
+            print("contact updated. New First Name is ${contactToEdit.firstName}")
         }
     }
 
-    override suspend fun getContact(): Contact {
-        TODO("Not yet implemented")
+    override suspend fun findContactById(id: String): Contact? {
+        val contact = realm.query<Contact>("id == $0", ObjectId(id)).first().find()
+        return contact
     }
+
 }

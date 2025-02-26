@@ -28,7 +28,6 @@ import io.realm.kotlin.Realm
 fun AddContactScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    realm: Realm,
     viewModel: ContactViewModel
 ) {
     var firstName by remember { mutableStateOf("") }
