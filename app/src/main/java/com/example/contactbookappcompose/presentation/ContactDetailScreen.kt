@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,14 +27,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.example.contactbookappcompose.R
 import com.example.contactbookappcompose.data.local.Contact
-import io.realm.kotlin.Realm
-import io.realm.kotlin.ext.query
-import org.mongodb.kbson.ObjectId
 
 @Composable
-fun ContactDetailScreen(id: String?, modifier: Modifier = Modifier, realm : Realm) {
+fun ContactDetailScreen(id: String?, modifier: Modifier = Modifier, viewModel: ContactViewModel, navController: NavHostController) {
 
     if(id == null){
         throw IllegalArgumentException("id is required")
@@ -42,17 +41,20 @@ fun ContactDetailScreen(id: String?, modifier: Modifier = Modifier, realm : Real
     val id = id.removePrefix("BsonObjectId(").removeSuffix(")")
     println(id)
 
-    val contact = realm.query<Contact>("id == $0", ObjectId(id)).find().first()
+    val contact = viewModel.findContactById(id)
 
-    ContactDetails(modifier, contact)
-
+    if(contact != null) {
+        ContactDetails(modifier, contact, viewModel, navController)
+    }
 
 }
 
 @Composable
 private fun ContactDetails(
     modifier: Modifier,
-    contact: Contact
+    contact: Contact,
+    viewModel: ContactViewModel,
+    navController: NavHostController
 ) {
     Column(
         modifier = modifier
@@ -98,6 +100,14 @@ private fun ContactDetails(
             ContactDetailRow(Icons.Default.LocationOn, contact.address)
             ContactDetailRow(Icons.Default.Info, contact.companyName)
         }
+
+        Button(
+            modifier = Modifier.fillMaxWidth().background(Color.Red),
+            onClick = {
+                viewModel.deleteContact(contact.id)
+                navController.popBackStack()
+            }
+        ) { }
     }
 }
 
