@@ -1,4 +1,4 @@
-package com.example.contactbookappcompose.presentation.ui.theme
+package com.example.contactbookappcompose.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,30 +12,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.example.contactbookappcompose.data.local.Contact
 import com.example.contactbookappcompose.domain.contact.ContactData
-import com.example.contactbookappcompose.presentation.ContactViewModel
 
 @Composable
 fun EditContactScreen(
-    modifier: Modifier = Modifier,
     id : String?,
     onEditSave: (contact: Contact, newContact: ContactData) -> Unit,
     popBackStack: () -> Unit,
-    navController: NavHostController,
-    viewModel: ContactViewModel
+    findContactById : (String) -> Contact?
 ) {
     if(id==null){throw IllegalArgumentException("id is required")}
 
-    val id = id.removePrefix("BsonObjectId(").removeSuffix(")")
-    println("EDIT contact with id $id. Inside EditContactScreen line 35")
+    val formatedId = id.removePrefix("BsonObjectId(").removeSuffix(")")
+    println("EDIT contact with id $formatedId. Inside EditContactScreen line 35")
 
-    val contact = viewModel.findContactById(id)
-        ?: throw IllegalArgumentException("contact with id $id not found")
+    val contact: Contact = findContactById(formatedId)
+        ?: throw IllegalArgumentException("contact with id $formatedId not found")
 
     var firstName by remember{mutableStateOf(contact.firstName)}
     var lastName by remember{mutableStateOf(contact.lastName)}
@@ -47,7 +44,8 @@ fun EditContactScreen(
 
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         OutlinedTextField(

@@ -67,6 +67,10 @@ dependencies {
     implementation ("io.realm.kotlin:library-base:2.0.0")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0")
 
+//    volley
+    implementation("com.android.volley:volley:1.2.1")
+
+
 //    implementation ("io.realm.kotlin:library-base:1.16.0")
 //    // If using Device Sync
 //    implementation ("io.realm.kotlin:library-sync:1.16.0")

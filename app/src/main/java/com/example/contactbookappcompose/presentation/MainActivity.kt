@@ -6,13 +6,18 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -20,12 +25,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.contactbookappcompose.presentation.ui.theme.ContactBookAppComposeTheme
-import com.example.contactbookappcompose.presentation.ui.theme.EditContactScreen
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -35,20 +40,10 @@ class MainActivity : ComponentActivity() {
 
         val viewModel: ContactViewModel by viewModels()
 
-//        CoroutineScope(Dispatchers.Main).launch {
-//
-//            println(contacts.toString())
-//
-//            contacts.data?.forEach { contact ->
-//                println("Contact: ${contact.firstName} ${contact.lastName}")
-//            }
-//        }
-
 
         setContent {
             ContactBookAppComposeTheme {
                 val navController = rememberNavController()
-
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     topBar = {
@@ -62,25 +57,52 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         )
-                    }
-                ) { innerPadding ->
-                    Box(
-                        modifier = Modifier.padding(innerPadding).fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
+                    },
+                    bottomBar = { BottomNavigationBar(navController) },
 
-                        val state = viewModel.state.collectAsState()
-                        if (state.value.errorMessage != null) {
-                            Text("an error occurred : ${state.value.errorMessage}")
-                        }
-                        if (state.value.isLoading) {
-                            Text("loading...")
-                        } else {
-                            Navigation(viewModel = viewModel, navController = navController)
+                ) { innerPadding ->
+
+                    Column(modifier = Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize()) {
+
+
+
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            val state = viewModel.state.collectAsState()
+                            if (state.value.errorMessage != null) {
+                                Text("an error occurred : ${state.value.errorMessage}")
+                            }
+                            if (state.value.isLoading) {
+                                Text("loading...")
+                            } else {
+                                Navigation(viewModel = viewModel, navController = navController)
+                            }
                         }
                     }
                 }
             }
+        }
+    }
+
+    @Composable
+    fun BottomNavigationBar(navController: NavController) {
+        NavigationBar {
+            NavigationBarItem(
+                icon = { Icon(Icons.Default.Search, contentDescription = "Search") },
+                label = { Text("Search") },
+                selected = false,
+                onClick = { navController.navigate("search_screen") }
+            )
+            NavigationBarItem(
+                icon = { Icon(Icons.Default.Person, contentDescription = "Contacts") },
+                label = { Text("Contacts") },
+                selected = false,
+                onClick = { navController.navigate("contact_list_screen") }
+            )
         }
     }
 
@@ -99,14 +121,21 @@ class MainActivity : ComponentActivity() {
             composable("contact_detail_screen/{id}") {
                 ContactDetailScreen(
                     id = it.arguments?.getString("id"),
-                    viewModel = viewModel,
-                    navController = navController
+                    findContactById = viewModel::findContactById,
+                    deleteContact = viewModel::deleteContact,
+                    navigate = navController::navigate,
+                    popBackStack = navController::popBackStack
                 )
             }
-            composable("add_contact") {
+            composable("add_contact") {it->
+//                val firstName = it.arguments?.getString("firstName")?:""
+//                val lastName = it.arguments?.getString("lastName")?:""
+//                val phoneNumber = it.arguments?.getString("phoneNumber")?:""
+//                val email = it.arguments?.getString("email")?:""
                 AddContactScreen(
-                    navController = navController,
-                    viewModel = viewModel)
+                    addContact = viewModel::addContact,
+                    popBackStack = navController::popBackStack,
+                )
             }
             composable("edit_contact/{id}") { it ->
                 val id = it.arguments?.getString("id")
@@ -114,11 +143,59 @@ class MainActivity : ComponentActivity() {
                     id = id,
                     onEditSave = viewModel::editContact,
                     popBackStack = navController::popBackStack,
-                    navController = navController,
-                    viewModel = viewModel,
+                    findContactById = viewModel::findContactById
+                )
+            }
+            composable("search_screen") {
+                SearchScreen(
+                    context = this@MainActivity,
+                    viewModel::searchContact,
+                    navigate = {
+                        firstName:String,
+                        lastName:String,
+                        email:String ->
+                        navController.navigate("add_contact/$firstName/$lastName/$email")},
+                )
+            }
+            composable("add_contact/{firstName}/{lastName}/{email}") { it ->
+                val firstName = it.arguments?.getString("firstName") ?: ""
+                val lastName = it.arguments?.getString("lastName") ?: ""
+                val email = it.arguments?.getString("email") ?: ""
+                AddContactScreen(
+                    addContact = viewModel::addContact,
+                    popBackStack = navController::popBackStack,
+                    firstName = firstName,
+                    lastName = lastName,
+                    email = email
                 )
             }
         }
     }
 }
 
+
+//                        SearchBar(
+//                            modifier = Modifier.fillMaxWidth(),
+//                            query = "",
+//                            onQueryChange = { println("on query change") },
+//                            onSearch = { println("onSearch") },
+//                            active = false,
+//                            onActiveChange = {println("onActiveChange")},
+//                            placeholder = { Text("Add From ISU Directory") },
+//                            leadingIcon = {
+//                                Icon    (
+//                                    imageVector = Icons.Default.Search,
+//                                    contentDescription = "Search Icon"
+//                                )
+//                            },
+//                            trailingIcon = {
+//                                Icon(
+//                                    modifier = Modifier.clickable {
+////                                        searchText = ""
+//                                    },
+//                                    imageVector = Icons.Default.Close,
+//                                    contentDescription = "Close Icon"
+//                                )
+//                            }
+//
+//                        ) { }

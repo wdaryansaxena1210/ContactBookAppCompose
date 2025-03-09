@@ -71,14 +71,16 @@ class ContactRepoImpl : ContactRepo {
     override suspend fun updateContact(contact: Contact, newContact: ContactData) {
         realm.write {
             val contactToEdit = findLatest(contact) ?: return@write
+            println("New contact Email ${newContact.email}")
             contactToEdit.apply {
+                this.email = newContact.email
                 this.firstName = newContact.firstName
                 this.lastName = newContact.lastName
                 this.phoneNumber = newContact.phoneNumber
-                this.email = newContact.email
                 this.address = newContact.address
+                this.companyName = newContact.companyName
             }
-            print("contact updated. New First Name is ${contactToEdit.firstName}")
+            print("contact updated. New Company Name is ${contactToEdit.companyName}")
         }
     }
 

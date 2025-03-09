@@ -30,9 +30,17 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.contactbookappcompose.R
 import com.example.contactbookappcompose.data.local.Contact
+import org.mongodb.kbson.ObjectId
 
 @Composable
-fun ContactDetailScreen(id: String?, modifier: Modifier = Modifier, viewModel: ContactViewModel, navController: NavHostController) {
+fun ContactDetailScreen(
+    id: String?,
+    modifier: Modifier = Modifier,
+    findContactById: (id: String) -> Contact?,
+    deleteContact: (id: ObjectId) -> Unit,
+    navigate: (route: String) -> Unit,
+    popBackStack: () -> Unit
+) {
 
     if(id == null){
         throw IllegalArgumentException("id is required")
@@ -41,11 +49,18 @@ fun ContactDetailScreen(id: String?, modifier: Modifier = Modifier, viewModel: C
     val id = id.removePrefix("BsonObjectId(").removeSuffix(")")
     println("find contact with id $id and render its Details")
 //
-    val contact = viewModel.findContactById(id)
+    val contact = findContactById(id)
 
 
     if(contact != null) {
-        ContactDetails(modifier, contact, viewModel, navController)
+        ContactDetails(
+            modifier,
+            contact,
+            findContactById,
+            deleteContact,
+            navigate,
+            popBackStack
+            )
     }
 
 }
@@ -54,8 +69,10 @@ fun ContactDetailScreen(id: String?, modifier: Modifier = Modifier, viewModel: C
 private fun ContactDetails(
     modifier: Modifier,
     contact: Contact,
-    viewModel: ContactViewModel,
-    navController: NavHostController
+    findContactById: (id: String) -> Contact?,
+    deleteContact: (id : ObjectId) -> Unit,
+    navigate: (route: String) -> Unit,
+    popBackStack: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -104,7 +121,7 @@ private fun ContactDetails(
 
         Button(
             modifier=Modifier.fillMaxWidth(),
-            onClick = {navController.navigate("edit_contact/${contact.id}")}
+            onClick = {navigate("edit_contact/${contact.id}")}
         ) {
             Text("Edit Contact")
         }
@@ -112,8 +129,8 @@ private fun ContactDetails(
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
-                viewModel.deleteContact(contact.id)
-                navController.popBackStack()
+                deleteContact(contact.id)
+                popBackStack()
             }
         ) { Text("Delete Contact") }
 

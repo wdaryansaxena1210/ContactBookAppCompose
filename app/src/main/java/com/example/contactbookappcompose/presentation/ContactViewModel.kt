@@ -1,11 +1,15 @@
 package com.example.contactbookappcompose.presentation
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.contactbookappcompose.data.local.Contact
+import com.example.contactbookappcompose.data.remote.Person
 import com.example.contactbookappcompose.data.repository.ContactRepoImpl
+import com.example.contactbookappcompose.data.repository.ISUDirectoryRepoImpl
 import com.example.contactbookappcompose.domain.contact.ContactData
 import com.example.contactbookappcompose.domain.repository.ContactRepo
+import com.example.contactbookappcompose.domain.repository.ISUDirectoryRepo
 import com.example.contactbookappcompose.domain.utils.Resource
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
@@ -24,13 +28,16 @@ import org.mongodb.kbson.ObjectId
 class ContactViewModel : ViewModel() {
 
     val contactRepo: ContactRepo = ContactRepoImpl()
+    val ISUContactRepo: ISUDirectoryRepo = ISUDirectoryRepoImpl()
 
 
     //producer of state flow and collector of state flow defined simultaneously. collector is accessed from Views/composables
 
     //producer of flow
     private val _state = MutableStateFlow<ContactState>(ContactState())
-    //collector of flow
+    // "collector of flow" ----- INCORRECT IDEA. The below is NOT a collector
+    //below is still a producer/emitter of flow, just that the producer is immutable
+    //whatever said and done, it is defo NOT a collector
     val state = _state.asStateFlow()
 
 
@@ -103,6 +110,15 @@ class ContactViewModel : ViewModel() {
     fun editContact(contact: Contact, newContact: ContactData){
         viewModelScope.launch(Dispatchers.IO) {
             contactRepo.updateContact(contact, newContact)
+        }
+    }
+
+    fun searchContact(context: Context, query: String, onResult: (persons: List<Person>) -> Unit){
+
+        //NOTE : onResult HAS to be a fucntion that changes a STATE variable's value
+        // onResult = {   (String:say) -> state.value = say    }
+        viewModelScope.launch {
+        ISUContactRepo.getContacts(context, query, onResult)
         }
     }
 }

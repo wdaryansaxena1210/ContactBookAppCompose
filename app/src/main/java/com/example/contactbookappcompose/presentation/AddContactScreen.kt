@@ -27,15 +27,22 @@ import io.realm.kotlin.Realm
 @Composable
 fun AddContactScreen(
     modifier: Modifier = Modifier,
-    navController: NavHostController,
-    viewModel: ContactViewModel
+    addContact : (Contact: ContactData) -> Unit,
+    popBackStack : () -> Unit,
+    firstName : String = "",
+    lastName : String = "",
+    phoneNumber : String = "",
+    email : String = "",
+    address : String = "",
+    companyName : String = ""
 ) {
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var phoneNumber by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var address by remember { mutableStateOf("") }
-    var companyName by remember { mutableStateOf("") }
+    //state variables specific to this screen. no need fro them to be global i.e. in viewmodel. LOCAL-STATE-VAR
+    var firstName by remember { mutableStateOf(firstName) }
+    var lastName by remember { mutableStateOf(lastName) }
+    var phoneNumber by remember { mutableStateOf(phoneNumber) }
+    var email by remember { mutableStateOf(email) }
+    var address by remember { mutableStateOf(address) }
+    var companyName by remember { mutableStateOf(companyName) }
 
     Column(
         modifier = modifier
@@ -91,10 +98,10 @@ fun AddContactScreen(
 
         Button(
             onClick = {
-                viewModel.addContact(
+                addContact(
                     ContactData(firstName, lastName, phoneNumber, email, address, companyName)
                 )
-                navController.popBackStack()
+                popBackStack()
             },
             modifier = Modifier.fillMaxWidth()
         ) {
